@@ -1,0 +1,20 @@
+{
+  "id": 6,
+  "name": "Add error handling to an API integration",
+  "category": "hardening",
+  "difficulty": "medium",
+  "description": "A REST client calls an external API with no error handling, no retries, and no timeout. Add proper error handling with typed errors, exponential backoff retry, and request timeout.",
+  "prompt": "The `fetchUsers` and `fetchUserById` functions in src/api-client.ts call an external API with no error handling. Add: (1) typed error classes for network, timeout, and HTTP errors, (2) a retry wrapper with exponential backoff (3 attempts, 1s/2s/4s delays), (3) a 5-second request timeout using AbortController. Do not change the function signatures.",
+  "expectedTools": ["Read", "Edit"],
+  "scoring": {
+    "automated": true,
+    "checks": [
+      "tsc --noEmit exits 0",
+      "Function signatures unchanged",
+      "Error classes exported (NetworkError, TimeoutError, HttpError)",
+      "Retry logic present with exponential backoff",
+      "AbortController timeout present",
+      "Original happy path behavior preserved"
+    ]
+  }
+}

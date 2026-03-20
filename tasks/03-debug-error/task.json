@@ -1,0 +1,18 @@
+{
+  "id": 3,
+  "name": "Fix a runtime error from a stack trace",
+  "category": "debug",
+  "difficulty": "medium",
+  "description": "A function throws 'Cannot read properties of undefined' at runtime. The stack trace points to src/parser.ts:15. Read the error, trace the root cause, and fix it.",
+  "prompt": "Running `npx tsx src/main.ts` produces this error:\n\nTypeError: Cannot read properties of undefined (reading 'trim')\n    at parseConfig (src/parser.ts:15:28)\n    at main (src/main.ts:8:18)\n\nFind and fix the root cause.",
+  "expectedTools": ["Read", "Edit", "Bash"],
+  "scoring": {
+    "automated": true,
+    "checks": [
+      "npx tsx src/main.ts exits 0",
+      "Output matches expected output",
+      "Fix is in parser.ts (not main.ts)",
+      "Handles the undefined case gracefully"
+    ]
+  }
+}

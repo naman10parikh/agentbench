@@ -1,0 +1,49 @@
+{
+  "name": "agentbench",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Lighthouse for AI coding harnesses. Benchmark your Claude Code setup and get a score out of 100.",
+  "main": "dist/src/index.js",
+  "bin": {
+    "agentbench": "dist/src/index.js"
+  },
+  "files": [
+    "dist",
+    "tasks",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "dev": "tsx src/index.ts",
+    "test": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "claude-code",
+    "benchmark",
+    "ai-agent",
+    "harness",
+    "lighthouse",
+    "developer-tools"
+  ],
+  "author": "Energy Platform",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "chalk": "^5.3.0",
+    "boxen": "^8.0.1",
+    "commander": "^13.1.0",
+    "fast-glob": "^3.3.3",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

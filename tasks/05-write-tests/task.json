@@ -1,0 +1,19 @@
+{
+  "id": 5,
+  "name": "Write unit tests for given functions",
+  "category": "testing",
+  "difficulty": "medium",
+  "description": "A module has 4 exported utility functions with no tests. Write comprehensive unit tests using Vitest covering happy paths, edge cases, and error conditions.",
+  "prompt": "Write unit tests for all 4 functions in src/math-utils.ts. Use Vitest. Place tests in test/math-utils.test.ts. Cover: happy paths, edge cases (zero, negative, empty), and boundary conditions. Aim for 100% branch coverage.",
+  "expectedTools": ["Read", "Write", "Bash"],
+  "scoring": {
+    "automated": true,
+    "checks": [
+      "test/math-utils.test.ts exists",
+      "npx vitest run exits 0",
+      "All 4 functions have at least 3 test cases each",
+      "Edge cases covered (zero, negative, large numbers, empty arrays)",
+      "Tests actually assert behavior (not just 'expect(true).toBe(true)')"
+    ]
+  }
+}

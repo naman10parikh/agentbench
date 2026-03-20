@@ -1,0 +1,18 @@
+{
+  "id": 2,
+  "name": "Add a function with a specific signature",
+  "category": "feature",
+  "difficulty": "easy",
+  "description": "Add a new exported function that validates email addresses using a regex pattern.",
+  "prompt": "Add an exported function `validateEmail(email: string): boolean` to src/validators.ts that returns true for valid email addresses.",
+  "expectedTools": ["Read", "Edit"],
+  "scoring": {
+    "automated": true,
+    "checks": [
+      "tsc --noEmit exits 0",
+      "validateEmail function exists and is exported",
+      "validateEmail('test@example.com') returns true",
+      "validateEmail('invalid') returns false"
+    ]
+  }
+}

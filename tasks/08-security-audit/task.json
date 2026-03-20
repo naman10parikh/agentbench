@@ -1,0 +1,20 @@
+{
+  "id": 8,
+  "name": "Find and fix security vulnerabilities",
+  "category": "security",
+  "difficulty": "hard",
+  "description": "A user-facing API route has multiple security vulnerabilities: SQL injection via string concatenation, missing input validation, no rate limiting header, and a leaked stack trace in error responses. Find all issues and fix them.",
+  "prompt": "Security audit src/routes/users.ts. Find and fix ALL vulnerabilities: (1) SQL injection, (2) missing input validation, (3) leaked error details in responses, (4) missing security headers. Use parameterized queries, add Zod validation, sanitize error responses, and add basic security headers.",
+  "expectedTools": ["Read", "Edit", "Grep"],
+  "scoring": {
+    "automated": true,
+    "checks": [
+      "tsc --noEmit exits 0",
+      "No string concatenation in SQL queries",
+      "Zod or similar validation on request body",
+      "Error responses do not leak stack traces",
+      "Security headers set (X-Content-Type-Options, X-Frame-Options)",
+      "Original API behavior preserved for valid requests"
+    ]
+  }
+}

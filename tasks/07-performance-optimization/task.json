@@ -1,0 +1,20 @@
+{
+  "id": 7,
+  "name": "Optimize a slow data processing function",
+  "category": "performance",
+  "difficulty": "hard",
+  "description": "A data processing pipeline has O(n^3) complexity due to nested loops, repeated array scans, and missing index lookups. Optimize it to O(n) or O(n log n) while preserving identical output.",
+  "prompt": "The `processOrders` function in src/pipeline.ts is extremely slow on large datasets. Profile it mentally, identify the bottlenecks (nested loops, repeated .find() calls, unnecessary sorts inside loops), and optimize. The function must produce identical output. Target: O(n log n) or better.",
+  "expectedTools": ["Read", "Edit"],
+  "scoring": {
+    "automated": true,
+    "checks": [
+      "tsc --noEmit exits 0",
+      "Function signature unchanged",
+      "Output identical for test dataset",
+      "No nested .find() or .filter() inside loops",
+      "Uses Map or Set for lookups",
+      "Sort called at most once"
+    ]
+  }
+}

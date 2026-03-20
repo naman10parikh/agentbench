@@ -1,0 +1,19 @@
+{
+  "id": 4,
+  "name": "Refactor a messy function into clean code",
+  "category": "refactor",
+  "difficulty": "medium",
+  "description": "A function uses deeply nested if-else blocks, magic numbers, and repeated logic. Refactor it to use early returns, named constants, and a lookup table while preserving identical behavior.",
+  "prompt": "Refactor the `calculateShipping` function in src/shipping.ts. It has deeply nested conditionals, magic numbers, and duplicated logic. Use early returns, named constants, and simplify the branching. All existing behavior must be preserved.",
+  "expectedTools": ["Read", "Edit"],
+  "scoring": {
+    "automated": true,
+    "checks": [
+      "tsc --noEmit exits 0",
+      "Function signature unchanged (same inputs/outputs)",
+      "Max nesting depth <= 2 (was 5)",
+      "No magic numbers remain",
+      "All test cases pass with identical output"
+    ]
+  }
+}

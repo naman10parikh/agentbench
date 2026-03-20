@@ -1,0 +1,16 @@
+{
+  "id": 1,
+  "name": "Fix a typo in a TypeScript file",
+  "category": "bug-fix",
+  "difficulty": "easy",
+  "description": "A TypeScript file has a misspelled variable name causing a compile error. Find and fix it.",
+  "prompt": "There's a typo in src/utils.ts causing a TypeScript compile error. Find and fix it.",
+  "expectedTools": ["Read", "Grep", "Edit"],
+  "scoring": {
+    "automated": true,
+    "checks": [
+      "tsc --noEmit exits 0",
+      "diff against expected/ has exactly 1 changed line"
+    ]
+  }
+}
