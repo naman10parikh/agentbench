@@ -1,86 +1,99 @@
-# AGENTS.md — Wiki Schema & Conventions
+# AGENTS.md — agentbench Orchestration Conventions
 
-> This file tells the LLM how your wiki is structured.
-> You and the LLM co-evolve this over time.
+> How an agent (Claude Code, or any LLM) should operate **inside this repo**.
+> agentbench is "Lighthouse for AI coding harnesses": a scorer CLI that holds the
+> model constant and measures the *harness* (CLAUDE.md, skills, hooks, rules) by
+> running real coding tasks and grading the output. The benchmark IS the product,
+> so this repo's "eval surface" is its own source — see the directory map below.
 
-## Domain: personal
+## What you are working on
 
-## Created: 2026-04-07
+A TypeScript CLI (`npx agentbench`) that:
 
-## Directory Structure
+1. Detects a target harness (`src/harness-detector.ts`) by reading its `CLAUDE.md`,
+   `.claude/settings.json`, `.claude/skills/`, `.claude/rules/`.
+2. Runs graded coding tasks (`tasks/`) in isolated temp workspaces (`src/workspace.ts`)
+   via the Claude API (`src/runner.ts`), injecting the detected harness as the system prompt.
+3. Evaluates output (`src/evaluator.ts` — LLM-as-judge via Haiku; automated diff vs `expected/`)
+   and scores it across 5 dimensions (`src/scorer.ts`).
+4. Reports a score out of 100 with a terminal scorecard + JSON (`src/reporter.ts`),
+   caching the bare-defaults baseline (`src/cache.ts`).
+
+## Directory map (this repo's actual structure)
 
 ```
-raw/              # Immutable source documents (never modified by LLM)
-wiki/             # LLM-generated markdown (the knowledge base)
-  index.md        # Content catalog — every page listed with summary
-  log.md          # Chronological record of operations
-  sources/        # One summary page per ingested source
-  entities/       # Pages for people, organizations, tools, etc.
-  concepts/       # Pages for ideas, frameworks, patterns, etc.
-  syntheses/      # Cross-cutting analyses, comparisons, explorations
-AGENTS.md         # This file — wiki schema and conventions
-config.yaml       # Configuration (LLM provider, sources, schedules)
+src/                      # The product — the scorer CLI
+  index.ts                #   CLI entry (commander; --task/--json/--compare/--no-cache/--model/--verbose)
+  runner.ts               #   Runs each task against the Claude API with the harness injected
+  harness-detector.ts     #   Reads CLAUDE.md/settings.json/skills/rules into a harness config
+  workspace.ts            #   Spins up isolated temp workspaces (your real code is never touched)
+  evaluator.ts            #   LLM-as-judge (Haiku) + automated checks against expected/
+  scorer.ts               #   Turns task results into 5 dimension scores + overall /100
+  reporter.ts             #   Terminal scorecard, JSON output, report file
+  cache.ts                #   Baseline caching (sha256 of task-suite + model version)
+  types.ts                #   Shared TaskDefinition / report types
+tasks/                    # The benchmark itself — 8 graded coding tasks (01..08)
+  NN-<name>/task.json     #   Task definition, prompt, expectedTools, scoring rubric
+  NN-<name>/workspace/    #   Starting (broken/incomplete) repo state
+  NN-<name>/expected/     #   Golden reference solution for automated diffing
+  index.ts                #   Loads + exports the task suite
+eval/                     # Eval-surface pointer note (the real eval lives in tasks/ + src/)
+identity/                 # Agent identity scaffold (SOUL/BRAND/HEARTBEAT/MEMORY)
+memory/                   # Long-term memory: MEMORY.md (index) + LEARNINGS.md (append-only) + topics/daily/archive
+brain/                    # Obsidian navigation graph: MOC + ORG_CONTEXT + ORG_MEMORY
+skills/                   # Repo-local agent skills (currently empty — see skills/README.md)
+hooks/                    # Repo-local lifecycle hooks (currently empty — see hooks/README.md)
+scripts/                  # Maintenance scripts (memory-search, memory-compress, doc-health-check, ...)
+.claude/                  # Inherited Claude Code harness: rules/ (glob-loaded), commands/, hooks/, agents/, skills/
+dist/                     # Build output (tsc); the published bin is dist/src/index.js
 ```
 
-## Page Conventions
+## How to extend the benchmark (the most common agent task)
 
-Every wiki page has YAML frontmatter:
+Add a task as a new directory under `tasks/`:
 
-```yaml
+```
+tasks/NN-task-name/
+├── task.json       # id, name, category, difficulty, description, prompt, expectedTools, scoring
+├── workspace/      # initial repo state (the broken/incomplete code)
+└── expected/       # reference solution for automated comparison
+```
+
+Then register it in `tasks/index.ts`. Automated tasks (`scoring.automated: true`) are graded by
+diff/compile/test checks; complex tasks fall back to `src/evaluator.ts` (LLM-as-judge).
+
+## Build & test (keep these green)
+
+```bash
+pnpm install
+pnpm build          # tsc → dist/
+pnpm test           # vitest  (CI runs: pnpm exec vitest run)
+pnpm lint           # tsc --noEmit
+pnpm dev            # tsx src/index.ts  (run the CLI from source)
+```
+
+CI (`.github/workflows/`) builds then runs `pnpm exec vitest run` — do not change the test
+script in a way that breaks that invocation.
+
+## Commit grammar (so git snap-back works at 3 granularities)
+
+This repo follows Conventional Commits, with these benchmark-specific scopes:
+
+- `feat(task):` — add or change a benchmark task under `tasks/`
+- `feat(scorer):` / `feat(evaluator):` — change how harnesses are graded
+- `feat(detector):` — change what `harness-detector.ts` reads from a harness
+- `fix:` / `refactor:` / `docs:` / `ci:` / `test:` — standard scopes
+
+One concern per commit so a single task, scorer change, or doc pass can be reverted independently.
+
+## Operating rules (inherited)
+
+Rules in `.claude/rules/` are glob-loaded every session (TypeScript style, Socratic gate,
+test-before-signal, error post-mortem, etc.). Read them before non-trivial changes. Act, don't
+ask; self-improve every session; test as a user (run the CLI, read the scorecard) — "it compiles"
+is not "it works".
+
 ---
-title: "Page Title"
-type: source | entity | concept | synthesis | index | log
-created: "YYYY-MM-DD"
-updated: "YYYY-MM-DD"
-tags: [tag1, tag2]
-sources: ["raw/filename.md"] # Which raw sources inform this page
-related: ["[[Other Page]]"] # Explicit cross-references
-summary: "One-line summary" # Used in index.md
----
-```
 
-## Wikilinks
-
-Use `[[Page Title]]` to link between pages. The LLM maintains these links.
-Orphan pages (no inbound links) are flagged by `wikimem lint`.
-
-## Operations
-
-### Ingest
-
-When a new source is added to raw/:
-
-1. Read the source completely
-2. Create/update a source summary page in wiki/sources/
-3. Identify entities mentioned → create/update entity pages
-4. Identify concepts discussed → create/update concept pages
-5. Update index.md with new/modified pages
-6. Append to log.md
-
-### Query
-
-When answering a question:
-
-1. Read index.md to find relevant pages
-2. Read the relevant pages
-3. Synthesize an answer with [[wikilink]] citations
-4. Optionally file the answer as a synthesis page
-
-### Lint
-
-Periodically check for:
-
-- Contradictions between pages
-- Stale claims superseded by newer sources
-- Orphan pages with no inbound links
-- Missing cross-references
-- Important concepts mentioned but lacking their own page
-- Data gaps that could be filled
-
-## Quality Standards
-
-- Every claim should cite its source via wikilink
-- Summaries should be concise (1-3 sentences in frontmatter)
-- Pages should be interconnected (no isolated islands)
-- Prefer updating existing pages over creating new ones
-- Flag contradictions explicitly rather than silently overwriting
+*The cross-repo WikiMem wiki-schema template that previously occupied this file is preserved as
+[`AGENTS.md.example`](AGENTS.md.example) for reference; it does not describe this repo.*
