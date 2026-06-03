@@ -1,0 +1,16 @@
+# agentbench
+
+> Lighthouse for AI coding harnesses. Benchmark your Claude Code setup and get a score out of 100.
+
+## Documentation
+
+- [README.md](README.md): Lighthouse for AI coding harnesses. Benchmark your Claude Code setup and get a score out of 100.
+- [AGENTS.md](AGENTS.md): > How an agent (Claude Code, or any LLM) should operate inside this repo.
+- [CLAUDE.md](CLAUDE.md): > Forged from Energy via harness-forge (CP103). One repo = one recursively self-improving
+- [QUICKSTART.md](QUICKSTART.md): agentbench is "Lighthouse for AI coding harnesses": it scores your Claude Code setup out of 100.
+- [CONTRIBUTING.md](CONTRIBUTING.md): Thanks for your interest in improving agentbench.
+
+## Notes
+
+- This file follows the llms.txt convention (https://llmstxt.org) so AI agents can
+  discover this repo's docs without scraping. Generated from the README + key docs.
