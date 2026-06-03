@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "name": "agentbench",
+  "display_name": "agentbench — Harness Scorer",
+  "description": "Score a Claude Code harness (CLAUDE.md, skills, rules, hooks) against the agentbench rubric and get a breakdown out of 100. No API calls — static analysis only.",
+  "version": "1.0.0",
+  "author": "Energy Platform",
+  "license": "MIT",
+  "repository": "https://github.com/naman10parikh/agentbench",
+  "mcp_servers": [
+    {
+      "name": "agentbench",
+      "description": "agentbench harness scorer MCP server",
+      "transport": "stdio",
+      "command": "node",
+      "args": ["dist/src/mcp-server.js"],
+      "env": {}
+    }
+  ],
+  "capabilities": {
+    "tools": [
+      {
+        "name": "score-a-harness",
+        "description": "Score the current (or a specified) Claude Code harness and return a breakdown out of 100 across CLAUDE.md depth, skills, rules, and hooks/settings dimensions.",
+        "when_to_use": "When you want to measure harness quality, compare two setups, or identify the highest-leverage improvement for a Claude Code project."
+      }
+    ]
+  },
+  "install_instructions": "1. Build the package: pnpm build\n2. Add this plugin to Claude Code: Settings → Plugins → Add local plugin → select this directory.\n3. The score-a-harness tool is now available in any Claude Code session."
+}
