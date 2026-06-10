@@ -3,9 +3,12 @@
 # Maintainer mandate #9: ingest the ENTIRE repo, not just current work.
 # Auto-detects unread resources, reports staleness, loads everything Claude needs.
 
-set -euo pipefail
+# No `-e`/pipefail: this is a context-injection hook — optional dirs (resources/,
+# packages/) don't exist in this repo and a missing dir must degrade gracefully,
+# not kill the hook (CP122 fix: script previously died at the first absent dir).
+set -u
 
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PROJECT_ROOT}"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${PROJECT_ROOT:-$(pwd)}}"
 TODAY=$(date '+%Y-%m-%d')
 DAILY_FILE="$PROJECT_DIR/memory/daily/$TODAY.md"
 
