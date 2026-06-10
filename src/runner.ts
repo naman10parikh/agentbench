@@ -7,6 +7,7 @@ import { scoreResults } from "./scorer.js";
 import { loadCache, saveCache } from "./cache.js";
 import { evaluateWithLlm } from "./evaluator.js";
 import { createTaskWorkspace, cleanupWorkspace } from "./workspace.js";
+import { logRun } from "./observability.js";
 import type { BenchmarkReport, TaskResult, TaskDefinition } from "./types.js";
 
 interface RunOptions {
@@ -71,6 +72,18 @@ export async function runBenchmark(
   // Generate recommendations
   const recommendations = generateRecommendations(dimensions);
 
+  // Observability: roll-up line for the whole benchmark run (token total +
+  // overall score), appended on the dispatch path alongside the per-task lines.
+  const totalInputTokens = results.reduce((s, r) => s + r.tokensUsed, 0);
+  logRun({
+    kind: "benchmark",
+    model: options.model,
+    inputTokens: totalInputTokens,
+    outputTokens: 0,
+    completed: true,
+    meta: { overallScore, taskCount: results.length, baselineScore },
+  });
+
   return {
     version: "1.0.0",
     timestamp: new Date().toISOString(),
@@ -108,9 +121,9 @@ async function runSingleTask(
 
     // Extract metrics from the response
     const toolsUsed = extractToolsUsed(response);
-    const tokensUsed =
-      (response.usage?.input_tokens ?? 0) +
-      (response.usage?.output_tokens ?? 0);
+    const inputTokens = response.usage?.input_tokens ?? 0;
+    const outputTokens = response.usage?.output_tokens ?? 0;
+    const tokensUsed = inputTokens + outputTokens;
     const output = extractTextOutput(response);
 
     // Check completion criteria
@@ -135,6 +148,23 @@ async function runSingleTask(
     const errorsRecovered =
       completed && errorsEncountered > 0 ? errorsEncountered : 0;
 
+    const durationMs = Date.now() - start;
+
+    // Observability: each graded task is a billable Anthropic API call. The
+    // product appends a cost/token line to .agentbench/runs.jsonl on the
+    // dispatch path itself (helios `helios log` pattern).
+    logRun({
+      kind: "task",
+      model: options.model,
+      taskId: task.id,
+      taskName: task.name,
+      inputTokens,
+      outputTokens,
+      toolsUsed,
+      completed,
+      durationMs,
+    });
+
     return {
       taskId: task.id,
       taskName: task.name,
@@ -144,7 +174,7 @@ async function runSingleTask(
       errorsEncountered,
       errorsRecovered,
       output: output.slice(0, 2000),
-      durationMs: Date.now() - start,
+      durationMs,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
