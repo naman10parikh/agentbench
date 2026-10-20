@@ -1,268 +1,264 @@
 # agentbench
 
-Lighthouse for AI coding harnesses. Benchmark your Claude Code setup and get a score out of 100.
+<!-- fleet:header:start -->
+[![CI](https://img.shields.io/github/actions/workflow/status/naman10parikh/agentbench/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/naman10parikh/agentbench/actions) [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Agent-native](https://img.shields.io/badge/agent--native-yes-2f5d8a?style=flat-square)](AGENTS.md) [![MCP server](https://img.shields.io/badge/MCP-server-1e3f60?style=flat-square)](#use-it-from-any-coding-agent) [![Skills](https://img.shields.io/badge/skills-4-2f6b4f?style=flat-square)](skills/) [![Stars](https://img.shields.io/github/stars/naman10parikh/agentbench?style=flat-square)](https://github.com/naman10parikh/agentbench/stargazers)
 
-<!-- TODO: Record demo GIF with `vhs` and add here -->
+**Lighthouse for coding-agent harnesses: score your setup out of 100.**
 
-## Why
+AgentBench is an agent employee, a packaged specialist agent with its own skills, memory and tests. It owns one job: evals. Its persona is Lumen. Coding agents use it through its skills, its MCP server and its command line. A scheduled job runs its evals and proposes fixes. A person makes every change.
 
-You spend hours tweaking CLAUDE.md, skills, hooks, and rules — but have no way to measure if your changes actually help. People share configs on X and GitHub with no evidence they work better than the defaults.
+_AgentBench is part of an agent-native play for agent-native systems that can eventually be recursively self-improving and evolving, operated by agent employees._
 
-Superpowers has 89K stars. Everyone has a different CLAUDE.md. Nobody can prove theirs is better.
+[AGENTS.md](AGENTS.md) · [llms.txt](llms.txt) · [Skills](skills/) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) · [All projects](https://github.com/naman10parikh)
+<!-- fleet:header:end -->
 
-agentbench gives you a number. Run it before and after every harness change. Share your score. Compete.
+agentbench puts a number on a coding agent's harness: its `CLAUDE.md`, skills, rules and hooks. The static score
+reads those files and scores them out of 100 with no API call. The benchmark holds the model fixed, sends 10 coding
+tasks to the Anthropic API with your `CLAUDE.md` in the system prompt, and scores the replies. Run it before and after
+a harness change to see whether the change helped.
 
-## Install
+<!-- fleet:use:start -->
+## Use it from any coding agent
+
+**Claude Code**: the plugin brings the skills, sub-agents, hooks and MCP server.
+
+```
+/plugin marketplace add naman10parikh/agentbench
+/plugin install agentbench@agentbench
+```
+
+<details><summary>Its MCP server, Codex, Cursor, Gemini CLI, one skill and the command line</summary>
+
+**Its MCP server**, in any MCP client:
 
 ```bash
-npx agentbench
+claude mcp add --transport stdio agentbench -- npx -y -p github:naman10parikh/agentbench agentbench-mcp
+codex mcp add agentbench -- npx -y -p github:naman10parikh/agentbench agentbench-mcp
 ```
 
-Or install globally:
-
-```bash
-npm install -g agentbench
-```
-
-Or clone and run locally:
-
-```bash
-git clone https://github.com/naman10parikh/agentbench.git
-cd agentbench
-pnpm install
-pnpm dev
-```
-
-## Quick Start
-
-```bash
-# Run the full benchmark (10 tasks, ~2 min, ~$0.50 API cost)
-npx agentbench
-
-# Run a single task to test quickly
-npx agentbench --task 1
-
-# Get JSON output for CI/scripts
-npx agentbench --json
-
-# Compare your harness against another CLAUDE.md
-npx agentbench --compare ~/other-project/CLAUDE.md
-
-# Re-run baseline from scratch (ignores cache)
-npx agentbench --no-cache
-
-# Use a specific model
-npx agentbench --model claude-sonnet-4-6
-
-# See detailed output for each task
-npx agentbench --verbose
-```
-
-## Example Output
-
-```
-  ┌─────────────────────────────────────────────┐
-  │                 agentbench                   │
-  │                                              │
-  │  HARNESS SCORE: 73 / 100                    │
-  │                                              │
-  │  Completion    ████████░░  82%              │
-  │  Efficiency    ██████░░░░  61%              │
-  │  Tool Use      ████████░░  78%              │
-  │  Recovery      █████░░░░░  54%              │
-  │  Quality       █████████░  91%              │
-  │                                              │
-  │  vs. baseline: +31 points                   │
-  │  Top tip: Add error recovery skills          │
-  └─────────────────────────────────────────────┘
-
-  Full report: .agentbench/report-2026-03-17.json
-```
-
-## What It Measures
-
-Your harness is scored across 5 dimensions (0-100 each):
-
-| Dimension      | What It Measures                          | How It's Scored                        |
-| -------------- | ----------------------------------------- | -------------------------------------- |
-| **Completion** | Did the agent finish each task correctly? | Pass/fail per task, averaged           |
-| **Efficiency** | How many tokens did it use vs. baseline?  | Ratio against bare defaults            |
-| **Tool Use**   | Did it pick the right tools for the job?  | Expected vs. actual tool selection     |
-| **Recovery**   | Did it recover from injected errors?      | Error recovery rate on seeded failures |
-| **Quality**    | How good is the output code?              | LLM-as-judge evaluation (via Haiku)    |
-
-The **overall score** is the average across all 5 dimensions.
-
-## The 10 Benchmark Tasks
-
-Each task runs in an isolated temporary workspace — your actual code is never touched.
-
-| #   | Task                                         | Difficulty | What It Tests                       |
-| --- | -------------------------------------------- | ---------- | ----------------------------------- |
-| 1   | Fix a typo in a TypeScript file              | Easy       | Basic navigation + edit             |
-| 2   | Add a function with a specific signature     | Easy       | Code generation accuracy            |
-| 3   | Refactor a function to reduce complexity     | Medium     | Code understanding + simplification |
-| 4   | Write unit tests for an existing module      | Medium     | Test generation quality             |
-| 5   | Fix a failing test by reading error output   | Medium     | Error comprehension + debugging     |
-| 6   | Add error handling to a throwing function    | Medium     | Recovery pattern knowledge          |
-| 7   | Resolve a merge conflict in git              | Hard       | Multi-file coordination             |
-| 8   | Find and fix a SQL injection vulnerability   | Hard       | Security awareness                  |
-| 9   | Refactor 3 files to extract a shared utility | Hard       | Cross-file reasoning                |
-| 10  | Add a REST endpoint with validation + tests  | Hard       | Full-stack completion               |
-
-Tasks 1-6 use **automated checks** (compilation, test pass, diff comparison).
-Tasks 7-10 use **LLM-as-judge** (Claude Haiku evaluates against a rubric).
-
-## How It Works
-
-```
-1. Detect harness  →  Reads CLAUDE.md, settings.json, .claude/skills/, .claude/rules/
-2. Run tasks       →  10 coding tasks in isolated temp workspaces via Claude API
-3. Evaluate        →  Automated checks + LLM-as-judge scoring
-4. Compare         →  Score vs. cached baseline (bare Claude Code defaults)
-5. Report          →  Terminal scorecard + JSON report + recommendations
-```
-
-### Harness Detection
-
-agentbench auto-detects your harness by reading:
-
-| File/Dir                | What It Extracts                      |
-| ----------------------- | ------------------------------------- |
-| `CLAUDE.md`             | System prompt, rules, operating model |
-| `.claude/settings.json` | Hook definitions, permissions         |
-| `.claude/skills/*.md`   | Skill count and content               |
-| `.claude/rules/*.md`    | Rule count and content                |
-
-This config is injected into the Claude API system prompt when running each task, exactly as Claude Code would use it.
-
-### Baseline Caching
-
-The first time you run agentbench, it benchmarks bare Claude Code defaults and caches the result. Subsequent runs only benchmark your harness and compare against the cache. The cache key is `sha256(task_suite_version + model_version)`.
-
-Clear cache: `npx agentbench --no-cache`
-
-### Cost Estimate
-
-| Component                        | Cost        |
-| -------------------------------- | ----------- |
-| 10 tasks via Sonnet              | ~$0.30-0.60 |
-| LLM-as-judge (4 tasks via Haiku) | ~$0.05-0.10 |
-| Baseline run (first time only)   | ~$0.30-0.60 |
-| **Typical run**                  | **~$0.50**  |
-
-## Configuration
-
-| Flag               | Default             | Description                                 |
-| ------------------ | ------------------- | ------------------------------------------- |
-| `--task <n>`       | all                 | Run a single task by number (1-10)          |
-| `--json`           | false               | Output results as JSON                      |
-| `--compare <path>` | none                | Compare against another CLAUDE.md           |
-| `--no-cache`       | false               | Ignore cached baseline, re-run from scratch |
-| `--model <id>`     | `claude-sonnet-4-6` | Model to benchmark with                     |
-| `--verbose`        | false               | Show detailed per-task output               |
-
-## JSON Output
-
-With `--json`, agentbench outputs a structured report:
+Cursor (`.cursor/mcp.json`), Gemini CLI (`.gemini/settings.json`) and most other clients take the same command as JSON:
 
 ```json
 {
-  "version": "0.1.0",
-  "timestamp": "2026-03-17T10:30:00Z",
-  "model": "claude-sonnet-4-6",
-  "overallScore": 73,
-  "baselineScore": 50,
-  "dimensions": [
-    { "name": "completion", "score": 82, "details": "8/10 tasks completed" },
-    {
-      "name": "efficiency",
-      "score": 61,
-      "details": "12,400 tokens (baseline: 18,200)"
-    },
-    { "name": "toolUse", "score": 78, "details": "7 unique tools used" },
-    { "name": "recovery", "score": 54, "details": "2/4 errors recovered" },
-    { "name": "quality", "score": 91, "details": "LLM judge average" }
-  ],
-  "recommendations": [
-    "Add error recovery skills or an error escalation protocol to your harness"
-  ],
-  "harnessConfig": {
-    "hasClaudeMd": true,
-    "claudeMdLines": 142,
-    "skillCount": 8,
-    "ruleCount": 3,
-    "hookCount": 5
+  "mcpServers": {
+    "agentbench": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "-p",
+        "github:naman10parikh/agentbench",
+        "agentbench-mcp"
+      ]
+    }
   }
 }
 ```
 
-## Adding Custom Tasks
+**Gemini CLI**: the extension brings the context and the MCP server.
 
-Each task is a directory under `tasks/` with:
-
-```
-tasks/NN-task-name/
-├── task.json       # Task definition, prompt, scoring rubric
-├── workspace/      # Initial repo state (the broken/incomplete code)
-└── expected/       # Reference solution (for automated comparison)
+```bash
+gemini extensions install https://github.com/naman10parikh/agentbench
 ```
 
-### task.json Format
+**One skill** (4 in all, in [skills/](skills/)), in any agent that reads Agent Skills:
 
-```json
-{
-  "id": 11,
-  "name": "Your task name",
-  "category": "bug-fix",
-  "difficulty": "medium",
-  "description": "What the task tests",
-  "prompt": "The exact prompt sent to the agent",
-  "expectedTools": ["Read", "Edit", "Bash"],
-  "scoring": {
-    "automated": true,
-    "checks": ["tsc --noEmit exits 0", "specific check here"]
-  }
-}
+```bash
+gemini skills install https://github.com/naman10parikh/agentbench --path skills/benchmark-harness
+git clone --depth 1 https://github.com/naman10parikh/agentbench /tmp/agentbench && cp -r /tmp/agentbench/skills/benchmark-harness ~/.claude/skills/
 ```
 
-## Improving Your Score
+**The command line:**
 
-Common harness improvements by dimension:
+```bash
+npx -y -p github:naman10parikh/agentbench agentbench --help
+```
 
-| Low Score In | What to Add                                       |
-| ------------ | ------------------------------------------------- |
-| Completion   | Clearer task completion criteria in CLAUDE.md     |
-| Efficiency   | Model routing rules (Haiku for simple subtasks)   |
-| Tool Use     | Tool preference rules ("Use Read instead of cat") |
-| Recovery     | Error escalation protocol, `/troubleshoot` skill  |
-| Quality      | Code style rules, pre-commit quality gate hook    |
+</details>
 
-## Comparison to Existing Benchmarks
+Codex, Cursor, OpenCode, GitHub Copilot and other agents read [AGENTS.md](AGENTS.md); Claude Code reads [CLAUDE.md](CLAUDE.md) and Gemini CLI reads [GEMINI.md](GEMINI.md), which import it. [llms.txt](llms.txt) maps every surface for agents that read first.
+<!-- fleet:use:end -->
 
-| Benchmark       | What It Tests                  | Our Difference                         |
-| --------------- | ------------------------------ | -------------------------------------- |
-| SWE-bench       | Model ability on GitHub issues | We test the **harness**, not the model |
-| HumanEval       | Code generation                | Single-function, no tool use           |
-| MBPP            | Python programming             | No harness awareness                   |
-| Aider benchmark | Edit accuracy                  | Doesn't score efficiency or recovery   |
+## Quick start
 
-agentbench is the only benchmark that holds the **model constant** and measures the **harness**. Same model, different scaffold: 42% vs 78%. The harness IS the product.
+You need Node 18 or newer. The static score needs nothing else.
 
-## Requirements
+```bash
+# Run it straight from GitHub, nothing installed: score the harness in the folder you are in
+npx -y -p github:naman10parikh/agentbench agentbench score
 
-- Node.js 18+
-- `ANTHROPIC_API_KEY` environment variable
-- ~$0.50 per benchmark run
+# Or keep a copy: clone, build, and put the commands on your PATH
+git clone https://github.com/naman10parikh/agentbench && cd agentbench
+npm install && npm install -g .
+```
 
-## Contributing
+Score a project, then benchmark it:
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). We especially welcome:
+```bash
+agentbench score ~/my-project          # free: CLAUDE.md, skills, rules, hooks, out of 100
+cd ~/my-project
+export ANTHROPIC_API_KEY=...           # the benchmark calls the Anthropic API and costs money
+agentbench --task 1                    # one task, the cheapest check
+agentbench --json                      # all 10 tasks, as JSON
+```
 
-- **New benchmark tasks** — the more diverse, the better the signal
-- **Scoring improvements** — better rubrics, tighter automated checks
-- **Bug reports** — if a score feels wrong, tell us
+Every benchmark call writes its tokens and estimated cost to `.agentbench/runs.jsonl` in the folder you ran it in.
+
+## How it works
+
+### The static score (free)
+
+`agentbench score [path]`, and the MCP tool `score-a-harness`, read the harness and give each part up to 25 points:
+
+| Part | Points |
+| --- | --- |
+| `CLAUDE.md` | 0 if missing, 5 under 20 lines, 15 under 60 lines, 25 at 60 lines or more |
+| Skills (`.claude/skills/**/*.md`) | 0 for none, 10 for 1 or 2, 18 for 3 to 7, 25 for 8 or more |
+| Rules (`.claude/rules/**/*.md`) | 0 for none, 10 for 1 or 2, 18 for 3 to 7, 25 for 8 or more |
+| Hooks and settings | 10 for a settings file, plus 3 per hook group in `.claude/settings.json` and `.claude/settings.local.json`, up to 25 |
+
+It saves the result to `.agentbench/mcp-score-<date>.json` in the scored folder.
+
+### The benchmark
+
+```
+1. Detect   →  reads CLAUDE.md, the settings files, .claude/skills/ and .claude/rules/
+2. Run      →  one Messages API call per task, with the first 4,000 characters of CLAUDE.md and
+               the task's file list in the system prompt, and five tool definitions
+3. Judge    →  the 4 hard tasks also go to an LLM judge
+4. Score    →  five dimensions, averaged to a score out of 100
+5. Report   →  terminal scorecard, or JSON with --json (also saved under .agentbench/)
+```
+
+Each task gets a temporary folder with its starting files, and your own code is never touched. The tools in the call
+are never run, so the benchmark reads only the model's first reply. Skills, rules and hooks are counted in the report
+but not sent to the model.
+
+| Dimension | How the code scores it |
+| --- | --- |
+| Completion | share of tasks done. A task is done when the reply calls a tool and the reply, with one `[tool: name(input)]` line per call, is longer than 50 characters. A hard task also needs a judge score of 50 or more. |
+| Efficiency | baseline tokens divided by your tokens. No baseline is measured yet, so this is 50 on every run. |
+| Tool use | 15 points per distinct tool called across all tasks, up to 100. |
+| Recovery | of the replies that mention "error", "failed" or "exception", the share of tasks done; 50 when none do. |
+| Quality | the average of the done rate and the share of replies with none of those words. |
+
+The overall score is the average of the five. The "baseline" score in the report is a fixed 50; the baseline cache
+(`.agentbench/cache/`, keyed by the task-suite version and the model) holds placeholder results until a measured
+baseline exists.
+
+### The 10 tasks
+
+| # | Task | Difficulty |
+| --- | --- | --- |
+| 1 | Fix a typo in a TypeScript file | Easy |
+| 2 | Add a function with a specific signature | Easy |
+| 3 | Refactor a function to reduce complexity | Medium |
+| 4 | Write unit tests for an existing module | Medium |
+| 5 | Fix a failing test by reading error output | Medium |
+| 6 | Add error handling to a function that throws | Medium |
+| 7 | Resolve a merge conflict in a git repo | Hard |
+| 8 | Find and fix a SQL injection vulnerability | Hard |
+| 9 | Refactor 3 files to extract a shared utility | Hard |
+| 10 | Add a REST endpoint with validation and tests | Hard |
+
+The definitions are in `tasks/index.ts` and the starting files in `src/workspace.ts`. To add a task, follow
+[skills/add-benchmark-task](skills/add-benchmark-task/SKILL.md).
+
+### Options
+
+| Flag or variable | Default | What it does |
+| --- | --- | --- |
+| `--task <n>` | all | Run one task (1 to 10) |
+| `--json` | off | Print the report as JSON |
+| `--compare <path>` | none | Benchmark another `CLAUDE.md` instead of the one in this folder |
+| `--no-cache` | off | Ignore the cached baseline |
+| `--model <id>` or `AGENTBENCH_MODEL` | built-in default | The model under test; it is a setting, never part of the score |
+| `--judge-model <id>` or `AGENTBENCH_JUDGE_MODEL` | built-in default | The LLM judge's model for the hard tasks |
+| `--verbose` | off | Print each task's result as it runs |
+
+The flag wins over the environment variable. The built-in defaults are in `src/index.ts` and `src/evaluator.ts`.
+
+### More commands
+
+| Command | What it does |
+| --- | --- |
+| `agentbench sandbox-run --task <n>` | boot an E2B microVM with a task's starting files and list them there (needs `E2B_API_KEY`) |
+| `agentbench memory-search "<query>"` | BM25 search over the memory and docs of the folder you run it in |
+
+### Improving your score
+
+| Low score in | What to try |
+| --- | --- |
+| Completion | Clear completion criteria in `CLAUDE.md` |
+| Efficiency | Model routing rules (a small model for simple subtasks) |
+| Tool use | Tool preference rules ("use Read instead of cat") |
+| Recovery | An error escalation protocol or a troubleshooting skill |
+| Quality | Code style rules and a pre-commit quality gate hook |
+
+### Other benchmarks
+
+| Benchmark | What it tests | How agentbench differs |
+| --- | --- | --- |
+| SWE-bench | Model ability on GitHub issues | It tests the harness, not the model |
+| HumanEval | Code generation | Single function, no tool use |
+| MBPP | Python programming | No harness awareness |
+| Aider benchmark | Edit accuracy | Does not score efficiency or recovery |
+
+agentbench holds the model constant and measures the harness.
+
+### Tests and evals
+
+```bash
+pnpm install && pnpm build
+pnpm test         # vitest: the scorer's unit tests
+pnpm eval         # every surface, then the whole CLI against a stand-in API, pass^3
+```
+
+The evals never call a paid API: `eval/stub-api.mjs` stands in for the Messages API. CI runs both on every push and
+pull request. New tasks and sharper scoring rules are the most useful contributions.
+
+<!-- fleet:anatomy:start -->
+## What it is made of
+
+Every project in this fleet is graded on the same 11 harness components and on self-improvement. Each mark is backed by a file you can open.
+
+| Component | Grade | Where |
+| --- | --- | --- |
+| Identity | ✅ | identity/SOUL.md:1 (Lumen; BRAND, HEARTBEAT and bootstrap MEMORY rewritten, no template slots) |
+| Memory | ✅ | memory/MEMORY.md:1 (about 680 tokens) + BM25 index src/memory-index.ts:208 (agentbench memory-search) + memory/LEARNINGS.md (6 rules) |
+| Skills | ✅ | skills/benchmark-harness/SKILL.md:1, skills/add-benchmark-task/SKILL.md:1, skills/sandbox-run/SKILL.md:1, skills/memory-search/SKILL.md:1 |
+| Tools/CLIs | ✅ | package.json:7 (bins agentbench, agentbench-mcp); src/index.ts:17 (--version); new free command agentbench score |
+| Hooks | ✅ | .claude/settings.json:4 (SessionStart context, PreToolUse dangerous-command and secret guards) + hooks/hooks.json:3 (plugin harness-change hook) |
+| Sub-agents | ✅ | .claude/agents/bench-runner.md:1, .claude/agents/task-author.md:1 (bundled in .claude-plugin/plugin.json) |
+| MCPs | ✅ | src/mcp-server.ts:54 (own stdio server, score-a-harness; bin agentbench-mcp) + .mcp.json:3 |
+| Dispatch | ✅ | src/runner.ts:23 (runBenchmark) and src/runner.ts:53 (one call per task, judge for hard tasks); scheduled run .github/workflows/improve.yml:9 |
+| Evals | ✅ | eval/run.sh:1 (surfaces 44, golden 9 tasks pass^3 against a stand-in API) gating CI .github/workflows/ci.yml:35 |
+| Observability | ✅ | src/observability.ts:71 (append-only .agentbench/runs.jsonl, tokens and estimated cost per call) + src/observability.ts:77 |
+| Sandbox/Infra | ✅ | src/sandbox.ts:58 (E2B microVM with the task's starting files; the check lists them, tsc only when the template has it) |
+| Self-improvement | ✅ | dsip.json:1 (L2) + .github/workflows/improve.yml (nightly loop) + scripts/improve.mjs |
+
+✅ real and tested · 🟡 partial, with the reason in the row · ❌ absent
+<!-- fleet:anatomy:end -->
+
+<!-- fleet:footer:start -->
+## How it improves itself
+
+It carries its own evals and a self-improvement contract, [`dsip.json`](dsip.json), which says what it may change and how a change is judged. A scheduled job runs its evals and proposes fixes. A person makes every change. Lessons it learns are kept as rules in its memory files.
+
+## Part of a fleet
+
+One of the projects by [Naman Parikh](https://github.com/naman10parikh). Each owns one part of an agent's harness, or of the product around an agent, and all of them follow one standard.
+
+Siblings: [agentdial](https://github.com/naman10parikh/agentdial) (identity) · [wikimem](https://github.com/naman10parikh/wikimem) (memory) · [skillsmith](https://github.com/naman10parikh/skillsmith) (skills) · [agent-booster](https://github.com/naman10parikh/agent-booster) (tools / CLIs) · [armory](https://github.com/naman10parikh/armory) (MCPs and the component registry) · [agentgrid](https://github.com/naman10parikh/agentgrid) (dispatch) · [agentswarm](https://github.com/naman10parikh/agentswarm) (dispatch) · [agentmoney](https://github.com/naman10parikh/agentmoney) (observability) · [claude-harness](https://github.com/naman10parikh/claude-harness) (the whole harness, as a template).
+
+## Contributing and security
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md). AI-assisted pull requests are welcome. Report a vulnerability privately, as [SECURITY.md](SECURITY.md) explains.
+
+## Star history
+
+[![Star history chart](https://api.star-history.com/svg?repos=naman10parikh/agentbench&type=Date)](https://star-history.com/#naman10parikh/agentbench&Date)
+<!-- fleet:footer:end -->
 
 ## License
 
-MIT
+MIT, see [LICENSE](LICENSE).

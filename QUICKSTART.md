@@ -2,14 +2,16 @@
 
 agentbench is "Lighthouse for AI coding harnesses": it scores your Claude Code setup out of 100.
 
-## Run it (the one command)
+## Run it
 
 ```bash
-npx agentbench
+npx -y -p github:naman10parikh/agentbench agentbench score        # free static score of this folder
+npx -y -p github:naman10parikh/agentbench agentbench --task 1     # one benchmark task (needs ANTHROPIC_API_KEY)
 ```
 
-That runs the full benchmark (8 graded coding tasks in isolated temp workspaces — your real code
-is never touched) and prints a scorecard. You need `ANTHROPIC_API_KEY` set; a typical run is ~$0.50.
+The full benchmark (`agentbench`) runs 10 coding tasks, each with its starting files in a temporary folder, so your
+real code is never touched. It calls the Anthropic API and costs money; `.agentbench/runs.jsonl` records the tokens
+and the estimated cost of every call.
 
 ## From a local clone
 
@@ -26,12 +28,12 @@ pnpm dev --task 1
 ## Useful flags
 
 ```bash
-npx agentbench --task 1                    # run one task by number
-npx agentbench --json                      # machine-readable report
-npx agentbench --compare ~/other/CLAUDE.md # score a different harness
-npx agentbench --no-cache                  # re-run the baseline from scratch
-npx agentbench --model claude-sonnet-4-6   # pick the model
-npx agentbench --verbose                   # detailed per-task output
+agentbench --task 1                    # run one task by number
+agentbench --json                      # machine-readable report
+agentbench --compare ~/other/CLAUDE.md # benchmark a different CLAUDE.md
+agentbench --no-cache                  # ignore the cached baseline
+agentbench --model <id>                # the model is a setting (or AGENTBENCH_MODEL)
+agentbench --verbose                   # detailed per-task output
 ```
 
 ## Where everything lives
