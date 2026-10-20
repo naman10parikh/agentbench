@@ -28,7 +28,8 @@ harness's `CLAUDE.md` in the system prompt and scores the replies; it needs `ANT
    The models are settings: `--model` or `AGENTBENCH_MODEL`, `--judge-model` or `AGENTBENCH_JUDGE_MODEL`.
 4. **Read what the number means.** A task counts as done when the first reply calls a tool and the reply, with one
    `[tool: name(input)]` line per call, is longer than 50 characters; a hard task also needs a judge score of 50
-   or more. Efficiency stays at 50 until a measured baseline exists. Say this when you report the score.
+   or more. Efficiency shows as not measured until a baseline run exists, and the overall score averages the
+   other four dimensions. Say this when you report the score.
 5. **Compare** two setups by running the same command in each folder, or `--compare <other CLAUDE.md>`.
 
 ## Output

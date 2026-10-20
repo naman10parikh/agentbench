@@ -33,7 +33,7 @@ The benchmark starts in [src/runner.ts](../src/runner.ts). [src/harness-detector
 5. The runner sends one Messages API request per task. The system prompt holds the first 4,000 characters of your `CLAUDE.md` and the list of starting files. The request defines five tools, but they are never run. Only the model's first reply is read.
 6. A task counts as done when the reply calls a tool and is longer than 50 characters. A hard task goes to the judge in [src/evaluator.ts](../src/evaluator.ts) and counts as done at a grade of 50 or more.
 7. [src/observability.ts](../src/observability.ts) appends the task's tokens and estimated cost to `.agentbench/runs.jsonl`. The temporary folder is then deleted.
-8. [src/scorer.ts](../src/scorer.ts) scores completion, efficiency, tool use, recovery and quality, each out of 100. The overall score is their average.
+8. [src/scorer.ts](../src/scorer.ts) scores completion, efficiency, tool use, recovery and quality, each out of 100. Efficiency has no baseline run to compare with yet, so it shows as not measured, with no score. The overall score is the average of the other four.
 9. [src/reporter.ts](../src/reporter.ts) prints a scorecard, or JSON with `--json`. It saves the full report as `.agentbench/report-<date>.json`.
 
 ## Extending it
@@ -57,4 +57,4 @@ Then run `pnpm build && pnpm test && pnpm eval`. CI runs the same steps on every
 
 **How do I run its tests and evals?** Run `pnpm install && pnpm build`, then `pnpm test` for the scorer's Vitest unit tests. `pnpm eval` runs [eval/run.sh](../eval/run.sh): a check of every install surface, then the whole command line against the stand-in API. Each golden task must pass three rounds in a row. No paid call is made.
 
-**What does it not do?** It never runs the model's tool calls or its code. It reads only the first reply. Skills, rules and hooks are counted in the report but not sent to the model. No baseline is measured yet, so efficiency is 50 on every run and the report's baseline is a fixed 50. Tool use counts distinct tools, not whether they were the expected ones.
+**What does it not do?** It never runs the model's tool calls or its code. It reads only the first reply. Skills, rules and hooks are counted in the report but not sent to the model. No baseline run is measured yet, so the report shows efficiency and the baseline as not measured. Tool use counts distinct tools, not whether they were the expected ones.

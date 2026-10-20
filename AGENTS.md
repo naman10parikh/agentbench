@@ -47,12 +47,13 @@ are never run: only the first reply is read.
 | Dimension | How it is computed |
 | --- | --- |
 | Completion | share of tasks done. A task is done when the reply calls a tool and the reply, with one `[tool: name(input)]` line per call, is longer than 50 characters. The 4 hard tasks also need an LLM judge score of 50 or more. |
-| Efficiency | baseline tokens divided by your tokens. No baseline is measured yet, so it is 50 on every run. |
+| Efficiency | baseline tokens divided by your tokens. No baseline run exists yet, so the report shows it as not measured (`score: null`). |
 | Tool use | 15 points per distinct tool called across all tasks, up to 100. |
 | Recovery | of the replies that mention "error", "failed" or "exception", the share of tasks done; 50 when none do. |
 | Quality | the average of the done rate and the share of replies with none of those words. |
 
-The overall score is the average of the five. The "baseline" score in the report is a fixed 50.
+The overall score is the average of the measured dimensions, four today. The report's `baselineScore` is `null`
+until a baseline run is measured.
 
 ## What not to do
 

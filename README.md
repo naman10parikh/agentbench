@@ -136,7 +136,7 @@ It saves the result to `.agentbench/mcp-score-<date>.json` in the scored folder.
 2. Run      →  one Messages API call per task, with the first 4,000 characters of CLAUDE.md and
                the task's file list in the system prompt, and five tool definitions
 3. Judge    →  the 4 hard tasks also go to an LLM judge
-4. Score    →  five dimensions, averaged to a score out of 100
+4. Score    →  five dimensions; the measured ones are averaged to a score out of 100
 5. Report   →  terminal scorecard, or JSON with --json (also saved under .agentbench/)
 ```
 
@@ -147,14 +147,14 @@ but not sent to the model.
 | Dimension | How the code scores it |
 | --- | --- |
 | Completion | share of tasks done. A task is done when the reply calls a tool and the reply, with one `[tool: name(input)]` line per call, is longer than 50 characters. A hard task also needs a judge score of 50 or more. |
-| Efficiency | baseline tokens divided by your tokens. No baseline is measured yet, so this is 50 on every run. |
+| Efficiency | baseline tokens divided by your tokens. No baseline run exists yet, so the report shows efficiency as not measured, with no score. |
 | Tool use | 15 points per distinct tool called across all tasks, up to 100. |
 | Recovery | of the replies that mention "error", "failed" or "exception", the share of tasks done; 50 when none do. |
 | Quality | the average of the done rate and the share of replies with none of those words. |
 
-The overall score is the average of the five. The "baseline" score in the report is a fixed 50; the baseline cache
-(`.agentbench/cache/`, keyed by the task-suite version and the model) holds placeholder results until a measured
-baseline exists.
+The overall score is the average of the dimensions that are measured, so today it averages four. The report shows the
+baseline as not measured too. The baseline cache (`.agentbench/cache/`, keyed by the task-suite version and the model)
+holds placeholder results until a baseline run exists.
 
 ### The 10 tasks
 
@@ -171,8 +171,9 @@ baseline exists.
 | 9 | Refactor 3 files to extract a shared utility | Hard |
 | 10 | Add a REST endpoint with validation and tests | Hard |
 
-The definitions are in `tasks/index.ts` and the starting files in `src/workspace.ts`. To add a task, follow
-[skills/add-benchmark-task](skills/add-benchmark-task/SKILL.md).
+The benchmark runs only the tasks defined in `tasks/index.ts`, with their starting files in `src/workspace.ts`. The
+numbered folders under `tasks/`, such as `tasks/01-fix-typo/`, are older reference material: the code does not read
+them. To add a task, follow [skills/add-benchmark-task](skills/add-benchmark-task/SKILL.md).
 
 ### Options
 

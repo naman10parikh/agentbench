@@ -85,15 +85,15 @@ while [ "$ROUND" -le "$K" ]; do
   else bad "static-score-bare-0-rich-100" "bare=$(json "$TMP/bare.json" "d['overallScore']") rich=$(json "$TMP/rich.json" "d['overallScore']") hooks=$(json "$TMP/rich.json" "d['harnessSummary']['hookCount']")"; fi
 
   # G3: the whole benchmark against the stand-in: every task, one call each with tools, a judge call per hard task,
-  # 5 dimensions,
-  # the overall score is their average, and the harness was detected from the folder it ran in.
+  # 5 dimensions, efficiency and the baseline reported as not measured (null, never a made-up 50), the overall score
+  # the average of the measured dimensions, and the harness detected from the folder it ran in.
   BEFORE=$(stub_lines)
   bench stub-tool "$TMP/full.json"
   CALLS="$(python3 -c "
 import json,sys
 rows=[json.loads(l) for l in open(sys.argv[1]).read().splitlines()[int(sys.argv[2]):]]
 print(sum(not r['judge'] for r in rows), sum(r['judge'] for r in rows))" "$STUB_LOG" "$BEFORE")"
-  FULL="$(json "$TMP/full.json" "len(d['taskResults'])==$NTASKS and all(t['completed'] for t in d['taskResults']) and len(d['dimensions'])==5 and d['overallScore']==round(sum(x['score'] for x in d['dimensions'])/5) and d['harnessConfig']['skillCount']==8 and d['harnessConfig']['hookCount']==5")"
+  FULL="$(json "$TMP/full.json" "len(d['taskResults'])==$NTASKS and all(t['completed'] for t in d['taskResults']) and len(d['dimensions'])==5 and [x['score'] for x in d['dimensions'] if x['name']=='efficiency']==[None] and d['baselineScore'] is None and d['overallScore']==int(sum(x['score'] for x in d['dimensions'] if x['score'] is not None)/4+0.5) and d['harnessConfig']['skillCount']==8 and d['harnessConfig']['hookCount']==5")"
   if [ "$FULL" = "True" ] && [ "$CALLS" = "$NTASKS $NHARD" ]; then ok "benchmark-scores-all-tasks-via-stand-in"
   else bad "benchmark-scores-all-tasks-via-stand-in" "report=$FULL calls(task judge)=$CALLS $(tail -2 "$TMP/full.json.err" | tr '\n' ' ')"; fi
 
@@ -151,6 +151,13 @@ print(tools==['score-a-harness'] and score==100 and '100/100' in text)")"
   if $CLI memory-search "settings.json hooks" --json 2>/dev/null | python3 -c "import json,sys; print(any('LEARNINGS' in h['path'] for h in json.load(sys.stdin)))" 2>/dev/null | grep -q True; then
     ok "memory-search-finds-a-learned-rule"
   else bad "memory-search-finds-a-learned-rule" "no memory/LEARNINGS.md hit"; fi
+
+  # G9: the terminal scorecard says efficiency and the baseline are not measured yet, and shows no score for them.
+  CARD="$(cd "$TMP/rich" && ANTHROPIC_BASE_URL="$STUB_URL" ANTHROPIC_API_KEY=stub-tool $CLI --no-cache --task 1 2>&1)"
+  if printf '%s\n' "$CARD" | grep -q "efficiency *not measured yet" && printf '%s\n' "$CARD" | grep -q "vs. baseline: not measured yet" &&
+     ! printf '%s\n' "$CARD" | grep -E "efficiency .*%" >/dev/null; then
+    ok "scorecard-says-efficiency-not-measured"
+  else bad "scorecard-says-efficiency-not-measured" "$(printf '%s\n' "$CARD" | grep -E 'efficiency|baseline' | tr -s ' ' | tr '\n' ' ')"; fi
 
   ROUND=$((ROUND+1))
 done

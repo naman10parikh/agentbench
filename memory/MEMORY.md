@@ -14,13 +14,14 @@
 
 ## Key Patterns
 
-- **5-dimension score:** completion · efficiency · tool use · recovery · quality → averaged to /100
-  (`src/scorer.ts`). A task is done when the first reply calls a tool and writes more than 50 characters;
-  recovery and quality are heuristics over that reply, and efficiency is 50 until a real baseline exists.
+- **5-dimension score:** completion · efficiency · tool use · recovery · quality; the measured ones are averaged
+  to /100 (`src/scorer.ts`). A task is done when the first reply calls a tool and writes more than 50 characters;
+  recovery and quality are heuristics over that reply, and efficiency is not measured (`null`) until a real
+  baseline exists.
 - **One reply per task:** one Messages API call with five tool definitions; the tools are never run. The four
   hard tasks also need an LLM judge score of 50 or more (`src/evaluator.ts`).
 - **Baseline cache:** keyed by `sha256(task_suite_version + model_version)` (`src/cache.ts`), but it holds
-  placeholder results today, and the reported baseline score is a fixed 50.
+  placeholder results today, and the reported baseline score is `null` (not measured).
 
 ## Technology Choices
 

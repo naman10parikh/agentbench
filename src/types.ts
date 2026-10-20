@@ -40,7 +40,8 @@ export interface TaskResult {
 
 export interface DimensionScore {
   name: "completion" | "efficiency" | "toolUse" | "recovery" | "quality";
-  score: number;
+  /** Out of maxScore, or null when the dimension is not measured yet (efficiency, until a baseline run exists). */
+  score: number | null;
   maxScore: number;
   details: string;
 }
@@ -53,7 +54,8 @@ export interface BenchmarkReport {
   taskResults: TaskResult[];
   dimensions: DimensionScore[];
   overallScore: number;
-  baselineScore: number;
+  /** null until a baseline run is measured. */
+  baselineScore: number | null;
   recommendations: string[];
 }
 

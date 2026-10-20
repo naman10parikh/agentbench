@@ -18,16 +18,24 @@ export function printScorecard(report: BenchmarkReport): void {
   ];
 
   for (const dim of report.dimensions) {
-    const bar = buildProgressBar(dim.score, 10);
     const label = dim.name.padEnd(12);
+    if (dim.score === null) {
+      lines.push(`  ${label} ${chalk.dim("not measured yet")}`);
+      continue;
+    }
+    const bar = buildProgressBar(dim.score, 10);
     lines.push(`  ${label} ${bar}  ${dim.score}%`);
   }
 
   lines.push("");
-  const delta = report.overallScore - report.baselineScore;
-  const deltaStr =
-    delta >= 0 ? chalk.green(`+${delta}`) : chalk.red(`${delta}`);
-  lines.push(`  vs. baseline: ${deltaStr} points`);
+  if (report.baselineScore === null) {
+    lines.push(`  vs. baseline: ${chalk.dim("not measured yet")}`);
+  } else {
+    const delta = report.overallScore - report.baselineScore;
+    const deltaStr =
+      delta >= 0 ? chalk.green(`+${delta}`) : chalk.red(`${delta}`);
+    lines.push(`  vs. baseline: ${deltaStr} points`);
+  }
 
   if (report.recommendations.length > 0) {
     lines.push(`  Top tip: ${report.recommendations[0]}`);

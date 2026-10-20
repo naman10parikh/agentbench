@@ -17,6 +17,8 @@
 - `sandbox-run` uses the benchmark's own task files, so tasks 9 and 10 work and each task gets its own files.
 - The E2B SDK loads only for `sandbox-run`, so every other command runs on Node 18.
 - The docs describe what the code scores today.
+- Efficiency and the baseline are reported as not measured, instead of a fixed 50: `null` in the JSON, "not measured
+  yet" on the scorecard. No baseline run exists yet. The overall score averages the measured dimensions.
 
 ## 0.1.0 (Unreleased)
 

@@ -32,13 +32,14 @@ function scoreEfficiency(
   const totalTokens = results.reduce((sum, r) => sum + r.tokensUsed, 0);
   const baselineTokens = baseline.reduce((sum, r) => sum + r.tokensUsed, 0);
 
-  // If baseline is 0 (no data yet), default to 50
+  // No baseline run exists yet (the cache holds placeholder results), so there is nothing to compare with: report
+  // the dimension as not measured instead of a made-up score.
   if (baselineTokens === 0) {
     return {
       name: "efficiency",
-      score: 50,
+      score: null,
       maxScore: 100,
-      details: "No baseline data — run with --no-cache to establish baseline",
+      details: `Not measured yet: no baseline run to compare your ${totalTokens} tokens with`,
     };
   }
 

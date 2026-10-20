@@ -50,3 +50,11 @@ Every error → root cause → rule. Auto-compressed when >500 lines (memory-com
 - **Rule:** describe what `src/runner.ts` and `src/scorer.ts` compute today: a task is done when the first reply
   calls a tool and writes more than 50 characters (hard tasks: the judge's score is 50 or more). The golden eval
   checks that rule against a stand-in API.
+
+## 2026-10-20 — The report showed an unmeasured score as a measured 50
+
+- **What broke:** efficiency printed 50% on every run and counted in the overall score, and the scorecard compared
+  the run with a "baseline" fixed at 50. No baseline run had ever been measured.
+- **Root cause:** a default stood in for a missing measurement, and nothing in the report said so.
+- **Rule:** a dimension with nothing to measure reports `null` and "not measured yet", and stays out of the overall
+  score. The golden eval checks the JSON and the scorecard for it.

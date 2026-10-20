@@ -101,12 +101,13 @@ describe("completion dimension", () => {
 // ---------------------------------------------------------------------------
 
 describe("efficiency dimension", () => {
-  it("defaults to 50 when baseline tokens are 0", () => {
+  it("is not measured when baseline tokens are 0: no score, and the details say so", () => {
     const results = [makeResult({ tokensUsed: 1000 })];
     const emptyBaseline = [makeResult({ tokensUsed: 0 })];
     const dims = scoreResults(results, emptyBaseline);
     const efficiency = dims.find((d) => d.name === "efficiency")!;
-    expect(efficiency.score).toBe(50);
+    expect(efficiency.score).toBeNull();
+    expect(efficiency.details).toContain("Not measured yet");
   });
 
   it("scores 100 when actual tokens equal baseline (same efficiency)", () => {

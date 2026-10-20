@@ -64,12 +64,14 @@ export async function runBenchmark(
     }
   }
 
-  // Score across 5 dimensions
+  // Score across 5 dimensions. The overall score averages the measured ones: a dimension that is not measured yet
+  // (efficiency, until a baseline run exists) is left out, not counted as 50.
   const dimensions = scoreResults(results, baselineResults);
+  const measured = dimensions.filter((d) => d.score !== null);
   const overallScore = Math.round(
-    dimensions.reduce((sum, d) => sum + d.score, 0) / dimensions.length,
+    measured.reduce((sum, d) => sum + (d.score ?? 0), 0) / measured.length,
   );
-  const baselineScore = 50;
+  const baselineScore = null; // no baseline run is measured yet
 
   // Generate recommendations
   const recommendations = generateRecommendations(dimensions);
@@ -360,12 +362,12 @@ function createPlaceholderResult(task: TaskDefinition): TaskResult {
 }
 
 function generateRecommendations(
-  dimensions: { name: string; score: number }[],
+  dimensions: { name: string; score: number | null }[],
 ): string[] {
   const recs: string[] = [];
 
   for (const dim of dimensions) {
-    if (dim.score < 50) {
+    if (dim.score !== null && dim.score < 50) {
       switch (dim.name) {
         case "completion":
           recs.push(

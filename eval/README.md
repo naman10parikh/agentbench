@@ -14,7 +14,8 @@ The golden tasks: the CLI answers `--help` and `--version`; without a key the be
 static score gives an empty folder 0 and a full harness 100, with hooks in `.claude/settings.json` counted; the whole
 benchmark scores every task, with one judge call per hard task; the run log records tokens and cost; a task is done
 only for a tool call with a reply over 50 characters; both models follow the environment and a flag wins; another
-agent scores a harness through the MCP server; memory search finds a learned rule.
+agent scores a harness through the MCP server; memory search finds a learned rule. The report and the scorecard show
+efficiency and the baseline as not measured, never as a made-up 50.
 
 Results go to `.agentbench/eval-golden.json` (gitignored). `scripts/improve.mjs` compares its time with
 [`baseline.json`](baseline.json) once that file exists.

@@ -4,9 +4,10 @@
   standard applied 2026-05-26 (CP104).
 - **Status:** v1.0.0. Product source is live in `src/` (9 modules: CLI runner, harness
   detector, isolated-workspace runner, LLM-as-judge evaluator, 5-dimension scorer, terminal/JSON
-  reporter, baseline cache). 8 graded benchmark tasks shipped in `tasks/` (01-fix-typo through
-  08-security-audit), each with `workspace/` + `expected/`. CI builds and runs `pnpm exec vitest run`.
-- **What's next:** expand from 8 → 10 tasks (07-09 multi-file/end-to-end), tighten the placeholder
+  reporter, baseline cache). The benchmark runs the 10 tasks defined in `tasks/index.ts`. The numbered folders
+  in `tasks/` (01-fix-typo through 08-security-audit, each with `workspace/` + `expected/`) are older reference
+  material that the code does not read. CI builds and runs `pnpm exec vitest run`.
+- **What's next:** measure a baseline run so efficiency gets a score, tighten the placeholder
   recovery + quality scoring in `src/scorer.ts`, record the demo GIF referenced in `README.md`,
   and publish to npm.
 
