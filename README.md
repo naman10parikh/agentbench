@@ -236,14 +236,14 @@ Every project in this fleet is graded on the same 11 harness components and on s
 | Component | Grade | Where |
 | --- | --- | --- |
 | Identity | ✅ | identity/SOUL.md:1 (Lumen; BRAND, HEARTBEAT and bootstrap MEMORY rewritten, no template slots) |
-| Memory | ✅ | memory/MEMORY.md:1 (about 680 tokens) + BM25 index src/memory-index.ts:208 (agentbench memory-search) + memory/LEARNINGS.md (6 rules) |
+| Memory | ✅ | memory/MEMORY.md:1 (about 680 tokens) + BM25 index src/memory-index.ts:208 (agentbench memory-search) + memory/LEARNINGS.md (7 rules) |
 | Skills | ✅ | skills/benchmark-harness/SKILL.md:1, skills/add-benchmark-task/SKILL.md:1, skills/sandbox-run/SKILL.md:1, skills/memory-search/SKILL.md:1 |
 | Tools/CLIs | ✅ | package.json:7 (bins agentbench, agentbench-mcp); src/index.ts:17 (--version); new free command agentbench score |
 | Hooks | ✅ | .claude/settings.json:4 (SessionStart context, PreToolUse dangerous-command and secret guards) + hooks/hooks.json:3 (plugin harness-change hook) |
 | Sub-agents | ✅ | .claude/agents/bench-runner.md:1, .claude/agents/task-author.md:1 (bundled in .claude-plugin/plugin.json) |
 | MCPs | ✅ | src/mcp-server.ts:54 (own stdio server, score-a-harness; bin agentbench-mcp) + .mcp.json:3 |
 | Dispatch | ✅ | src/runner.ts:23 (runBenchmark) and src/runner.ts:53 (one call per task, judge for hard tasks); scheduled run .github/workflows/improve.yml:9 |
-| Evals | ✅ | eval/run.sh:1 (surfaces 44, golden 9 tasks pass^3 against a stand-in API) gating CI .github/workflows/ci.yml:35 |
+| Evals | ✅ | eval/run.sh:1 (surfaces 44, golden 10 tasks pass^3 against a stand-in API) gating CI .github/workflows/ci.yml:35 |
 | Observability | ✅ | src/observability.ts:71 (append-only .agentbench/runs.jsonl, tokens and estimated cost per call) + src/observability.ts:77 |
 | Sandbox/Infra | ✅ | src/sandbox.ts:58 (E2B microVM with the task's starting files; the check lists them, tsc only when the template has it) |
 | Self-improvement | ✅ | dsip.json:1 (L2) + .github/workflows/improve.yml (nightly loop) + scripts/improve.mjs |
