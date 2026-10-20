@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "AgentBench: Lighthouse for coding-agent harnesses: score your setup out of 100."
+type: software
+authors:
+  - family-names: Parikh
+    given-names: Naman
+repository-code: "https://github.com/naman10parikh/agentbench"
+license: MIT
+version: "1.0.0"
+abstract: "Lighthouse for coding-agent harnesses: score your setup out of 100."
+keywords: ["agent-native", "evals", "benchmark", "harness-engineering"]
