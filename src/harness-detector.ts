@@ -31,22 +31,7 @@ export async function detectHarness(
     suppressErrors: true,
   });
 
-  // Count hooks from settings.json
-  let hookCount = 0;
-  const settingsPath = `${cwd}/.claude/settings.local.json`;
-  if (existsSync(settingsPath)) {
-    try {
-      const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
-      if (settings.hooks) {
-        hookCount = Object.values(settings.hooks).reduce(
-          (sum: number, arr) => sum + (Array.isArray(arr) ? arr.length : 0),
-          0,
-        );
-      }
-    } catch {
-      // Intentionally silent: settings.json may be malformed
-    }
-  }
+  const hookCount = countHooks(cwd);
 
   return {
     hasClaudeMd,
@@ -56,4 +41,25 @@ export async function detectHarness(
     hookCount,
     hasSettingsJson,
   };
+}
+
+/**
+ * Hook groups configured in a harness: the shared `.claude/settings.json` and the personal
+ * `.claude/settings.local.json` both count. A malformed file counts as zero.
+ */
+export function countHooks(root: string): number {
+  let total = 0;
+  for (const name of ["settings.json", "settings.local.json"]) {
+    const path = `${root}/.claude/${name}`;
+    if (!existsSync(path)) continue;
+    try {
+      const settings = JSON.parse(readFileSync(path, "utf-8")) as { hooks?: Record<string, unknown> };
+      for (const groups of Object.values(settings.hooks ?? {})) {
+        if (Array.isArray(groups)) total += groups.length;
+      }
+    } catch {
+      // Intentionally silent: a malformed settings file counts as no hooks
+    }
+  }
+  return total;
 }

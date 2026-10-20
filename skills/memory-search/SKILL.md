@@ -21,7 +21,7 @@ of `grep` so you get *ranked, snippet-bearing* recall, not a flat substring dump
 
 ## Steps
 
-1. **Run the query** (built CLI):
+1. **Run the query** from the repository root, since it indexes the folder you run it in (built CLI):
    ```bash
    node dist/src/index.js memory-search "<your query>" --limit 5
    ```

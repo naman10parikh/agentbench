@@ -1,11 +1,13 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { TaskDefinition } from "./types.js";
 
-const JUDGE_MODEL = "claude-haiku-4-5-20251001";
+/** The judge's default model. Override with `--judge-model` or AGENTBENCH_JUDGE_MODEL. */
+export const DEFAULT_JUDGE_MODEL = "claude-haiku-4-5-20251001";
 
 export async function evaluateWithLlm(
   task: TaskDefinition,
   agentOutput: string,
+  judgeModel: string = process.env.AGENTBENCH_JUDGE_MODEL || DEFAULT_JUDGE_MODEL,
 ): Promise<number> {
   const client = new Anthropic();
 
@@ -28,7 +30,7 @@ Respond with ONLY a JSON object:
 {"score": <number>, "reasoning": "<one sentence>"}`;
 
   const response = await client.messages.create({
-    model: JUDGE_MODEL,
+    model: judgeModel,
     max_tokens: 200,
     temperature: 0,
     messages: [{ role: "user", content: prompt }],

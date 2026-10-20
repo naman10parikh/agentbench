@@ -1,70 +1,32 @@
 ---
 name: add-benchmark-task
-description: Scaffold a new graded coding task for the agentbench benchmark suite. Use when asked to "add a task", "extend the benchmark", "create a new benchmark case", or grow the harness eval surface (tasks/NN-name/). This is agentbench's single most common authoring task.
-allowed-tools: Read, Write, Edit, Bash(ls:*), Bash(./node_modules/.bin/tsc:*), Bash(./node_modules/.bin/vitest:*)
+description: Add a graded coding task to the agentbench benchmark. Use when asked to "add a task", "extend the benchmark", "create a new benchmark case" or cover a new kind of coding work. The task goes in tasks/index.ts and its starting files in src/workspace.ts; the eval proves it runs end to end with no paid call.
 ---
 
-# Add a Benchmark Task
+# add-benchmark-task: grow the benchmark by one task
 
-agentbench scores a harness by running graded coding tasks in isolated temp workspaces and grading
-the output. Each task is a directory under `tasks/` plus an entry in `tasks/index.ts`. This skill
-adds one correctly so the new case actually flows through `src/runner.ts` → `src/evaluator.ts` →
-`src/scorer.ts`.
-
-## Trigger
-
-- "Add a benchmark task for <category>"
-- "The suite is missing a <hard/recovery/security> case — create it"
-- "Extend the eval surface with task NN"
+The benchmark is the list returned by `loadTasks()` in `tasks/index.ts`. Each task's starting files live in
+`TASK_FIXTURES` in `src/workspace.ts`; the runner writes them to a temporary folder, and `sandbox-run` writes the
+same files into an E2B microVM. The folders `tasks/NN-*/` are older reference material: the code does not read them.
 
 ## Steps
 
-1. **Pick the next number.** `ls tasks/` → the highest `NN-name` directory. New task is `NN+1`.
-   The numeric prefix is load-bearing: `src/sandbox.ts` and the cache key match on it.
-
-2. **Create the three required pieces** under `tasks/NN-task-name/`:
-   - `task.json` — human-readable spec (mirrors the entry you add to `index.ts`).
-   - `workspace/` — the *starting* (broken/incomplete) repo state the model is handed.
-   - `expected/` — the golden reference solution, for automated diffing in `src/evaluator.ts`.
-
-3. **Add the TaskDefinition to `tasks/index.ts`** (this is what actually loads — `task.json` is the
-   readable copy). Required fields, matching `src/types.ts`:
-   ```ts
-   {
-     id: NN,
-     name: "<one line>",
-     category: "bug-fix" | "feature" | "refactor" | "performance" | "security" | "testing",
-     difficulty: "easy" | "medium" | "hard",
-     description: "<what the task exercises>",
-     prompt: "<the exact instruction the model receives>",
-     expectedTools: ["Read", "Edit", ...],   // what a good harness should reach for
-     hasInjectedError: false,                  // true only for recovery tasks
-     scoringRubric: {
-       completionCriteria: ["<binary, checkable>"],
-       qualityChecks: ["No unnecessary changes", ...],
-       expectedTokenRange: { min: <n>, max: <n> },
-     },
-   }
+1. **Pick the next id** (`loadTasks().length + 1`) and a difficulty. A `hard` task is also graded by the LLM judge
+   (`src/evaluator.ts`), so it costs one more API call per run.
+2. **Add the definition** to `tasks/index.ts`: `id`, `name`, `category`, `difficulty`, `description`, the exact
+   `prompt`, `expectedTools`, `hasInjectedError` and a `scoringRubric` (completion criteria, quality checks,
+   expected token range).
+3. **Add the starting files** under the same id in `TASK_FIXTURES` (`src/workspace.ts`): every file the prompt
+   names, plus a `tsconfig.json` for TypeScript tasks.
+4. **Build and run the evals**, which run every task against a stand-in API, so nothing is spent:
+   ```bash
+   pnpm build && pnpm test && pnpm eval
    ```
+5. **Optional, with an E2B key:** `node dist/src/index.js sandbox-run --task <id>` boots a microVM with the new
+   task's files.
+6. **Update the docs** that count tasks: the README task table and `identity/SOUL.md`.
 
-4. **Make completion binary.** A good task has a yes/no completion check the evaluator can verify
-   automatically (compiles, a named export exists, a test passes, exactly one line changed). Avoid
-   tasks whose only grade is taste — those inflate the LLM-judge's variance.
+## Output
 
-5. **Choose the grading track.** Simple tasks → automated (`scoring.automated: true`, diff vs
-   `expected/`). Open-ended tasks → LLM-as-judge (Haiku) via `src/evaluator.ts`. State which in
-   `task.json`.
-
-## Verify (do not skip)
-
-```bash
-./node_modules/.bin/tsc                 # tasks/index.ts must still typecheck against src/types.ts
-./node_modules/.bin/vitest run          # the suite stays green
-node dist/src/index.js --task NN --json # the new task loads and runs end-to-end (needs ANTHROPIC_API_KEY)
-```
-
-## Expected output
-
-A new `tasks/NN-task-name/` directory (task.json + workspace/ + expected/), a new entry in
-`tasks/index.ts`, `tsc` clean, suite green, and the task selectable via `--task NN`. Report the new
-task's id, category, and completion criteria.
+A new task in `tasks/index.ts` with its files in `src/workspace.ts`, `pnpm eval` passing with the new task count,
+and the README table updated. Commit it as `feat(task): <name>`.

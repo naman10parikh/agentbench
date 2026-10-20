@@ -196,6 +196,11 @@ export { router as userRouter };
   },
 };
 
+/** The starting files of a benchmark task, as {relative path: content}; empty for an unknown task. */
+export function taskFixtures(taskId: number): Record<string, string> {
+  return TASK_FIXTURES[taskId] ?? {};
+}
+
 export function createTaskWorkspace(task: TaskDefinition): string {
   const workDir = join(
     tmpdir(),

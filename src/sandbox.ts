@@ -20,21 +20,8 @@
 import { Sandbox } from "@e2b/sdk";
 import { loadTasks } from "../tasks/index.js";
 import { logRun } from "./observability.js";
+import { taskFixtures } from "./workspace.js";
 import type { TaskDefinition } from "./types.js";
-
-// The same fixture content the local workspace uses, re-declared minimally for
-// the few tasks whose verification is a clean `tsc --noEmit`. We re-read from the
-// task workspace dir so this stays in sync with the benchmark corpus.
-import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const TASKS_DIR = join(
-  fileURLToPath(new URL(".", import.meta.url)),
-  "..",
-  "..",
-  "tasks",
-);
 
 export interface SandboxRunResult {
   taskId: number;
@@ -46,37 +33,6 @@ export interface SandboxRunResult {
   stdout: string;
   stderr: string;
   durationMs: number;
-}
-
-/** Recursively collect the files under a task's workspace/ as {relPath: content}. */
-function collectWorkspaceFiles(taskDir: string): Record<string, string> {
-  const root = join(taskDir, "workspace");
-  const files: Record<string, string> = {};
-  if (!existsSync(root)) return files;
-
-  const walk = (dir: string) => {
-    for (const entry of readdirSync(dir)) {
-      const abs = join(dir, entry);
-      if (entry === "node_modules" || entry === ".git") continue;
-      const st = statSync(abs);
-      if (st.isDirectory()) {
-        walk(abs);
-      } else {
-        files[relative(root, abs)] = readFileSync(abs, "utf-8");
-      }
-    }
-  };
-  walk(root);
-  return files;
-}
-
-function taskDirFor(task: TaskDefinition): string {
-  // tasks/NN-name — match by numeric prefix.
-  const prefix = String(task.id).padStart(2, "0");
-  for (const entry of readdirSync(TASKS_DIR)) {
-    if (entry.startsWith(prefix + "-")) return join(TASKS_DIR, entry);
-  }
-  throw new Error(`No task directory found for task ${task.id}`);
 }
 
 /**
@@ -94,8 +50,9 @@ export async function runTaskInSandbox(
     );
   }
 
-  const taskDir = taskDirFor(task);
-  const files = collectWorkspaceFiles(taskDir);
+  // The same starting files the benchmark gives the model for this task (src/workspace.ts).
+  const files = taskFixtures(task.id);
+  if (Object.keys(files).length === 0) throw new Error(`No starting files for task ${task.id}`);
 
   // Boot a fresh Firecracker microVM. The @e2b/sdk default template ships Node.
   const sandbox = await Sandbox.create();

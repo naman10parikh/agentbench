@@ -1,0 +1,17 @@
+{
+  "name": "agentbench",
+  "version": "1.0.0",
+  "description": "Lighthouse for coding-agent harnesses: score your setup out of 100.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "agentbench": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "-p",
+        "github:naman10parikh/agentbench",
+        "agentbench-mcp"
+      ]
+    }
+  }
+}

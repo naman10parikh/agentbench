@@ -14,6 +14,8 @@ interface RunOptions {
   taskNumber?: number;
   useCache: boolean;
   model: string;
+  /** The LLM judge's model for hard tasks; the evaluator's default when unset. */
+  judgeModel?: string;
   verbose: boolean;
   comparePath?: string;
 }
@@ -139,7 +141,7 @@ async function runSingleTask(
     // For hard tasks, use LLM-as-judge for better evaluation
     let qualityScore = 0;
     if (task.difficulty === "hard") {
-      qualityScore = await evaluateWithLlm(task, output);
+      qualityScore = await evaluateWithLlm(task, output, options.judgeModel);
       completed = qualityScore >= 50;
     }
 

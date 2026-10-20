@@ -28,7 +28,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      # The package "test" script is bare `vitest` (watch mode); invoke run mode
-      # explicitly so CI does not hang.
       - name: Test
-        run: pnpm exec vitest run
+        run: pnpm test
+
+      - name: Eval (surfaces, the whole CLI against a stand-in API, pass^3)
+        run: pnpm eval

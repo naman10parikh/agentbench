@@ -1,16 +1,47 @@
 # agentbench
 
-> Lighthouse for AI coding harnesses. Benchmark your Claude Code setup and get a score out of 100.
+> Lighthouse for coding-agent harnesses: score your setup out of 100. agentbench is an agent-native, self-improving
+> agent employee, Lumen, whose job is evals: a free static score reads a harness's files (CLAUDE.md, skills, rules,
+> hooks), and the benchmark holds the model fixed and scores 10 coding tasks with the harness's CLAUDE.md in the system prompt.
+> Use it from any coding agent through its MCP server, its skills, its Claude Code plugin or its command line.
 
-## Documentation
+## Start here
 
-- [README.md](README.md): Lighthouse for AI coding harnesses. Benchmark your Claude Code setup and get a score out of 100.
-- [AGENTS.md](AGENTS.md): > How an agent (Claude Code, or any LLM) should operate inside this repo.
-- [CLAUDE.md](CLAUDE.md): > Forged from Energy via harness-forge (CP103). One repo = one recursively self-improving
-- [QUICKSTART.md](QUICKSTART.md): agentbench is "Lighthouse for AI coding harnesses": it scores your Claude Code setup out of 100.
-- [CONTRIBUTING.md](CONTRIBUTING.md): Thanks for your interest in improving agentbench.
+- [AGENTS.md](AGENTS.md): what it does, every tool and how to call it, how the benchmark scores, what not to do
+- [README.md](README.md): install, quick start, what each score means
+- [identity/SOUL.md](identity/SOUL.md): Lumen, the agent employee: mission, personality, boundaries
 
-## Notes
+## Skills
 
-- This file follows the llms.txt convention (https://llmstxt.org) so AI agents can
-  discover this repo's docs without scraping. Generated from the README + key docs.
+- [skills/benchmark-harness/SKILL.md](skills/benchmark-harness/SKILL.md): score a harness, the free score first
+- [skills/add-benchmark-task/SKILL.md](skills/add-benchmark-task/SKILL.md): add a graded coding task
+- [skills/sandbox-run/SKILL.md](skills/sandbox-run/SKILL.md): boot an E2B microVM with a task's starting files
+- [skills/memory-search/SKILL.md](skills/memory-search/SKILL.md): search this repository's memory and docs
+
+## MCP tools
+
+- [src/mcp-server.ts](src/mcp-server.ts): the `agentbench-mcp` server, 1 tool: score-a-harness (the static score, no API call)
+- [.mcp.json](.mcp.json): the server's one-line config for any MCP client
+
+## Plugin and sub-agents
+
+- [.claude-plugin/plugin.json](.claude-plugin/plugin.json): the Claude Code plugin (skills, sub-agents, MCP server, hook)
+- [hooks/hooks.json](hooks/hooks.json): the hook that reminds an agent a harness edit can be measured for free
+- [.claude/agents/bench-runner.md](.claude/agents/bench-runner.md): sub-agent that scores a harness and explains the number
+- [.claude/agents/task-author.md](.claude/agents/task-author.md): sub-agent that adds or fixes a benchmark task
+- [gemini-extension.json](gemini-extension.json): the Gemini CLI extension
+- [.well-known/agent-card.json](.well-known/agent-card.json): the A2A agent card
+
+## How it improves itself
+
+- [dsip.json](dsip.json): the self-improvement contract and its honest level
+- [eval/run.sh](eval/run.sh): the evals (surfaces, then the whole CLI against a stand-in API, pass^3)
+- [scripts/improve.mjs](scripts/improve.mjs): one turn of the nightly improvement loop
+- [memory/MEMORY.md](memory/MEMORY.md): the memory index
+- [memory/LEARNINGS.md](memory/LEARNINGS.md): every correction, kept as a rule
+
+## Docs
+
+- [tasks/index.ts](tasks/index.ts): the 10 benchmark tasks, their prompts and rubrics
+- [CHANGELOG.md](CHANGELOG.md): what changed in each version
+- [CONTRIBUTING.md](CONTRIBUTING.md): how to contribute

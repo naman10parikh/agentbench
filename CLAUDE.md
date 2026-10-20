@@ -1,57 +1,32 @@
-# agentbench — Agent-Native Harness
+@AGENTS.md
 
-> Forged from Energy via harness-forge (CP103). One repo = one recursively self-improving
-> agent-native harness. Energy is the control center; this is a self-contained flavor.
+# Claude Code in agentbench
 
-## What this is
+Everything any coding agent needs is in `AGENTS.md`, imported above. This file holds only what is specific to Claude
+Code.
 
-agentbench is **"Lighthouse for AI coding harnesses"** — a TypeScript CLI (`npx agentbench`)
-that benchmarks a Claude Code setup and returns a **score out of 100**. It holds the *model*
-constant and measures the *harness* (your `CLAUDE.md`, skills, hooks, rules) by running 8 graded
-coding tasks in isolated temp workspaces and scoring the output across 5 dimensions — completion,
-efficiency, tool use, recovery, and quality. Same model, different scaffold: 42% vs 78%. The
-harness is the product, so this benchmark measures the thing that actually moves the number.
+## What loads when you open this repository
 
-## Harness components (where the formula maps to real folders)
+- **Hooks** (`.claude/settings.json`): `SessionStart` runs `.claude/hooks/session-start-context.sh`, which prints the
+  session context for this repository; `PreToolUse` on Bash runs `.claude/hooks/block-dangerous-commands.cjs`, and on Read, Edit, Write
+  and Bash runs `.claude/hooks/protect-secrets.cjs`, which keeps `.env` files and keys out of the session.
+- **Sub-agents** (`.claude/agents/`): `bench-runner` and `task-author` are agentbench's own; the other seven
+  (`architect`, `code-reviewer`, `test-writer` and the rest) are general reviewers for work on this codebase.
+- **MCP** (`.mcp.json`): only agentbench's own server, `agentbench-mcp`. The inherited development servers (GitHub,
+  Context7, a file-backed memory and an Obsidian vault over `brain/`) need a token or a relative path, so they live in
+  `.mcp.dev.json`. Load them with `claude --mcp-config .mcp.dev.json`.
+- **Rules** (`.claude/rules/`) are glob-loaded every session.
 
-| Component                       | Lives in                                      |
-| ------------------------------- | --------------------------------------------- |
-| identity                        | `identity/` (SOUL · BRAND · HEARTBEAT · MEMORY) |
-| memory + brain                  | `memory/` (MEMORY.md index, LEARNINGS.md, topics/daily/archive) + `brain/` (Obsidian MOC graph) |
-| product source (the scorer CLI) | `src/` (index · runner · harness-detector · workspace · evaluator · scorer · reporter · cache · types) |
-| benchmark + eval surface        | `tasks/` (8 graded tasks: workspace/ + expected/ + task.json) + `eval/` (pointer note) |
-| skills                          | `skills/` (repo-local, currently empty) + `.claude/skills/` (inherited) |
-| hooks                           | `hooks/` (repo-local, currently empty) + `.claude/hooks/` (inherited lifecycle hooks) |
-| subagents                       | `.claude/agents/` (code-reviewer, architect, security-reviewer, test-writer, research-agent, ...) |
-| rules / commands                | `.claude/rules/` (glob-loaded every session) + `.claude/commands/` (slash commands) |
-| scripts                         | `scripts/` (memory-search · memory-compress · doc-health-check · budget-manager · auto-switch) |
-| build output                    | `dist/` (tsc; published bin = `dist/src/index.js`) |
+## The plugin
 
-Same formula as every Energy harness, different data. Full directory map + how-to-extend live in
-[`AGENTS.md`](AGENTS.md); the navigation graph hub is [`brain/MOC - agentbench.md`](brain/MOC%20-%20agentbench.md).
+`.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json` make this repository a Claude Code plugin: the
+skills in `skills/`, the two sub-agents, the MCP server and the harness-change hook in `hooks/hooks.json`, which
+reminds the agent that a harness edit can be measured with the free static score. Check it with
+`claude plugin validate .` before you change any of those files.
 
-## Build / test / run
+## Working here
 
-```bash
-pnpm install
-pnpm build          # tsc → dist/
-pnpm test           # vitest   (CI: pnpm exec vitest run)
-pnpm lint           # tsc --noEmit
-pnpm dev            # tsx src/index.ts — run the CLI from source
-npx agentbench      # run the full benchmark against the current harness
-```
-
-Test as a user: run `pnpm dev --task 1` and read the scorecard. "It compiles" means nothing.
-
-## Operating model
-
-You are the user's co-founder. Act, don't ask. Self-improve every session. Test as a user.
-Inherited rules in `.claude/rules/` are glob-loaded every session (TypeScript style, Socratic
-gate, test-before-signal, error post-mortem).
-
-## Commit convention
-
-Conventional Commits. Benchmark-specific scopes so git snap-back works at all 3 granularities:
-`feat(task):` (a benchmark task) · `feat(scorer):` / `feat(evaluator):` (grading) ·
-`feat(detector):` (what a harness exposes) · plus `fix:` · `refactor:` · `docs:` · `ci:` · `test:`.
-One concern per commit so a single task, scorer change, or doc pass reverts independently.
+- Never run the real benchmark to test a change: it costs money. `pnpm eval` runs the whole CLI against a stand-in.
+- Follow the commit grammar in `AGENTS.md` (`feat(task):`, `feat(scorer):` and the rest).
+- Act, then test as a user: `pnpm build && pnpm test && pnpm eval`, then the command you changed.
+- When you fix an error, add it to `memory/LEARNINGS.md` as what broke, the root cause, and the rule.

@@ -14,4 +14,4 @@ Warm black (#141312) background · Bright amber (#fbbf24) for score highlights �
 
 ## Landing Copy
 
-Lumen holds Claude constant and measures your harness. Run `npx agentbench` on any Claude Code setup and get a score out of 100 — broken down by completion, efficiency, tool use, recovery, and quality. A bare CLAUDE.md scores 42. The right harness scores 78. Lumen shows you the gap and which dimension to fix first.
+Lumen holds the model fixed and measures your harness. Score any Claude Code setup out of 100 for free from its files, or run the benchmark for a score broken down by completion, efficiency, tool use, recovery and quality. Lumen shows you the gap between two setups and which part to fix first.

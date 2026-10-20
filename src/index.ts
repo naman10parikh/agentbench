@@ -4,8 +4,8 @@ import { Command } from "commander";
 import { runBenchmark } from "./runner.js";
 import { printScorecard, printJson, writeReport } from "./reporter.js";
 import { searchRepo } from "./memory-index.js";
-import { sandboxRun } from "./sandbox.js";
 import { runsLogPath } from "./observability.js";
+import { scoreHarness } from "./static-score.js";
 
 const program = new Command();
 
@@ -57,6 +57,8 @@ program
   .option("--json", "Output result as JSON", false)
   .action(async (opts: { task?: number; json: boolean }) => {
     try {
+      // Loaded only here: the E2B SDK needs a recent Node, and every other command must run on Node 18.
+      const { sandboxRun } = await import("./sandbox.js");
       const result = await sandboxRun(opts.task);
       if (opts.json) {
         console.log(JSON.stringify(result, null, 2));
@@ -76,6 +78,26 @@ program
   });
 
 // ---------------------------------------------------------------------------
+// score — the free static score: no API call, no key needed.
+// ---------------------------------------------------------------------------
+program
+  .command("score [path]")
+  .description("Score a harness out of 100 from its files alone (CLAUDE.md, skills, rules, hooks). No API call.")
+  .option("--json", "Output the score as JSON", false)
+  .action(async (path: string | undefined, opts: { json: boolean }) => {
+    const result = await scoreHarness(path);
+    if (opts.json) {
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    console.log(`Harness score: ${result.overallScore}/${result.maxScore}`);
+    for (const d of result.breakdown) {
+      console.log(`  ${d.dimension.padEnd(18)} ${String(d.score).padStart(3)}/${d.maxScore}  ${d.detail}`);
+    }
+    if (result.reportPath) console.log(`Saved to ${result.reportPath}`);
+  });
+
+// ---------------------------------------------------------------------------
 // default benchmark command (no subcommand) — the original CLI behavior.
 // ---------------------------------------------------------------------------
 program
@@ -85,7 +107,15 @@ program
   .option("--json", "Output results as JSON", false)
   .option("--compare <path>", "Compare against another CLAUDE.md")
   .option("--no-cache", "Ignore cached baseline, re-run from scratch")
-  .option("--model <id>", "Model to benchmark with", "claude-sonnet-4-6")
+  .option(
+    "--model <id>",
+    "Model to benchmark with (or set AGENTBENCH_MODEL)",
+    process.env.AGENTBENCH_MODEL || "claude-sonnet-4-6",
+  )
+  .option(
+    "--judge-model <id>",
+    "Model for the LLM judge on the hard tasks (or set AGENTBENCH_JUDGE_MODEL)",
+  )
   .option("--verbose", "Show detailed task output", false)
   .action(async (options) => {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -102,6 +132,7 @@ program
         taskNumber: options.task,
         useCache: options.cache !== false,
         model: options.model,
+        judgeModel: options.judgeModel,
         verbose: options.verbose,
         comparePath: options.compare,
       });

@@ -5,19 +5,30 @@
   "description": "Lighthouse for AI coding harnesses. Benchmark your Claude Code setup and get a score out of 100.",
   "main": "dist/src/index.js",
   "bin": {
-    "agentbench": "dist/src/index.js"
+    "agentbench": "dist/src/index.js",
+    "agentbench-mcp": "dist/src/mcp-server.js"
   },
   "files": [
     "dist",
     "tasks",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "skills",
+    "hooks",
+    "identity",
+    "AGENTS.md",
+    "llms.txt",
+    "memory/MEMORY.md",
+    "memory/LEARNINGS.md"
   ],
   "scripts": {
     "build": "tsc",
+    "prepare": "tsc",
     "prepublishOnly": "npm run build",
     "dev": "tsx src/index.ts",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "eval": "bash eval/run.sh",
     "lint": "tsc --noEmit"
   },
   "keywords": [
@@ -26,7 +37,12 @@
     "ai-agent",
     "harness",
     "lighthouse",
-    "developer-tools"
+    "developer-tools",
+    "agent-native",
+    "mcp",
+    "agent-skills",
+    "self-improving",
+    "evals"
   ],
   "author": "Energy Platform",
   "license": "MIT",
