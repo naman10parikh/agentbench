@@ -16,14 +16,12 @@ s/CHAIRMAN/MAINTAINER/g
 s/Naman's/the user's/g
 s/Naman/the user/g
 s#energy-taupe\.vercel\.app#your-app.example.com#g
-s#/Users/naman/energy#$PROJECT_ROOT#g
-s#/Users/naman#$HOME#g
+s#/Users/[^/]*/energy#$PROJECT_ROOT#g
+s#/Users/[^/]*#$HOME#g
 s/the_complete_story\.md/VISION.md/g
 s/the_complete_story/the vision doc/g
 s/complete_story/vision/g
 s/CHAIRMAN-CHECKLIST/PROJECT-CHECKLIST/g
-s/Gayathri/[redacted]/g
-s/Gayatri/[redacted]/g
 SED
 
 # Apply across harness dirs (only those that exist) + root docs. find -exec (bash-3.2 safe).
@@ -37,7 +35,7 @@ rm -f "$SEDP"
 echo "  scrub applied."
 
 echo "=== VERIFY (residual sensitive tokens — want 0) ==="
-PAT='chairman|Chairman|CHAIRMAN|\bNaman\b|energy-taupe|/Users/naman|the_complete_story|CHAIRMAN-CHECKLIST|Gayathri|Gayatri'
+PAT='chairman|Chairman|CHAIRMAN|\bNaman\b|energy-taupe|/Users/[^/]+/|the_complete_story|CHAIRMAN-CHECKLIST'
 HITS=$(grep -rIl -E "$PAT" "$D/.claude" "$D/memory" "$D/identity" "$D/brain" "$D/CLAUDE.md" "$D/AGENTS.md" "$D/CONTEXT.md" "$D/QUICKSTART.md" 2>/dev/null || true)
 N=$(printf '%s\n' "$HITS" | grep -c . || true)
 echo "  files with residual sensitive tokens: $N"
