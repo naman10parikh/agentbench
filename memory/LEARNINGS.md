@@ -51,7 +51,7 @@ Every error → root cause → rule. Auto-compressed when >500 lines (memory-com
   calls a tool and writes more than 50 characters (hard tasks: the judge's score is 50 or more). The golden eval
   checks that rule against a stand-in API.
 
-## 2026-10-20 — The report showed an unmeasured score as a measured 50
+## 2026-10-20: The report showed an unmeasured score as a measured 50
 
 - **What broke:** efficiency printed 50% on every run and counted in the overall score, and the scorecard compared
   the run with a "baseline" fixed at 50. No baseline run had ever been measured.
